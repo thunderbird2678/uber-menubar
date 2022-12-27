@@ -212,7 +212,6 @@ export const render = ({
   if (warning) {
     return <div>{warning}</div>;
   }
-  console.log("numSpaces: ", numSpaces);
   return (
     <>
       <link
@@ -231,7 +230,6 @@ export const render = ({
             style={{ justifyContent: "flex-start" }}
           >
             {[...Array(numSpaces)].map((element, index) => {
-              console.log("index: ", index);
               if (index !== activeSpace) {
                 return (
                   <div
