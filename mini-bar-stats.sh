@@ -25,6 +25,9 @@ SPOTIFY_SONG=$(osascript -e 'tell application "Spotify" to name of current track
 # get battery information
 BATTERY_LEVEL=$(pmset -g batt | grep -o "\d*%" | grep -o "\d*")
 BATTERY_STATUS=$(pmset -g batt | grep -o  "; [a-zA-Z]*;" | grep -o "[a-zA-Z]*")
+# get space information
+NUM_SPACES=$(python3 StatBar.widget/spaces.py | awk '{print $1}')
+ACTIVE_SPACE=$(python3 StatBar.widget/spaces.py | awk '{print $2}')
 
 printf -v output '{"date_day":"%s",'            "$DATE_DAY"
 printf -v output '"%s\n"date_month":"%s",'      "$output"   "$DATE_MONTH"
@@ -35,6 +38,8 @@ printf -v output '"%s\n"ssid":"%s",'            "$output"   "$SSID"
 printf -v output '"%s\n"cpu_usage":"%s",'       "$output"   "$CPU_USAGE"
 printf -v output '"%s\n"mem_usage":"%s",'       "$output"   "$MEM_USAGE"
 printf -v output '"%s\n"volume":"%s",'          "$output"   "$VOLUME"
+printf -v output '"%s\n"num_spaces":"%s",'      "$output"   "$NUM_SPACES"
+printf -v output '"%s\n"active_space":"%s",'    "$output"   "$ACTIVE_SPACE"
 printf -v output '"%s\n"batt_level":"%s",'      "$output"   "$BATTERY_LEVEL"
 printf -v output '"%s\n"batt_status":"%s",'     "$output"   "$BATTERY_STATUS"
 printf -v output '"%s\n"spotify_status":"%s",'  "$output"   "$SPOTIFY_STATUS"
