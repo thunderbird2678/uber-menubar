@@ -1,7 +1,7 @@
 import { css, run, React } from "uebersicht";
 import * as config from "./config.json";
 
-export const refreshFrequency = 2500;
+export const refreshFrequency = 1000;
 
 // get the current screen resolution
 const screenWidth = window.screen.width;
@@ -78,6 +78,14 @@ const green = css({
   backgroundColor: "#a6d189",
 });
 
+const yellow = css({
+  backgroundColor: "#e5c890",
+});
+
+const clickable = css({
+  cursor: "pointer",
+});
+
 const metricStyle = css({
   display: "inline-block",
   border: "none",
@@ -108,6 +116,9 @@ export const initialState = {
   year: "...",
   time: "...",
   ampm: "...",
+  spotifyStatus: "...",
+  spotifyArtist: "...",
+  spotifySong: "...",
   cpuUsage: 0,
   memoryUsage: 0,
   volume: 0,
@@ -131,6 +142,9 @@ export const updateState = (event, previousState) => {
       cpuUsage: parseFloat(event.data.cpu_usage).toFixed(2),
       memoryUsage: parseFloat(event.data.mem_usage).toFixed(0),
       volume: event.data.volume,
+      spotifyStatus: event.data.spotify_status,
+      spotifyArtist: event.data.spotify_artist,
+      spotifySong: event.data.spotify_song,
       wifi: {
         ssid: event.data.ssid,
       },
@@ -153,6 +167,9 @@ export const render = ({
   memoryUsage,
   wifi,
   volume,
+  spotifyStatus,
+  spotifySong,
+  spotifyArtist,
 }) => {
   if (warning) {
     return <div>{warning}</div>;
@@ -167,6 +184,20 @@ export const render = ({
       />
       <div className={metricsStyle}>
         <div className={metricsStyleRow}>
+          <div className={`${metricStyle} ${yellow}`}>
+            {spotifyArtist} - {spotifySong} |{" "}
+            {spotifyStatus === "playing" ? (
+              <i
+                className={`${clickable} fas fa-play`}
+                onClick={() => run("StatBar.widget/spotify-pause.sh")}
+              />
+            ) : (
+              <i
+                className={`${clickable} fas fa-pause`}
+                onClick={() => run("StatBar.widget/spotify-play.sh")}
+              />
+            )}
+          </div>
           <div className={`${metricStyle} ${green}`}>
             <i className={`fas fa-microchip`}></i> {cpuUsage}%
           </div>
