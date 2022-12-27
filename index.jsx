@@ -21,8 +21,11 @@ export const command = (dispatch) => {
   run(
     "StatBar.widget/mini-bar-stats.sh " + options.timezone + " " + options.disk
   ).then((output) => {
+    // horrible hack because I can't figure out how to cleanly handle the printf
+    let raw = output;
+    raw = raw.substring(raw.indexOf("{"), raw.indexOf("}") + 1);
     // parse the output as JSON
-    const stats = JSON.parse(output);
+    const stats = JSON.parse(raw);
     dispatch({
       type: "UPDATE_STATS",
       data: stats,
@@ -38,17 +41,19 @@ export const className = {
   width: options.width,
   userSelect: "none",
 
-  backgroundColor: "#232634",
-  height: "38px",
+  backgroundColor: "transparent",
+  height: "56px",
   boxSizing: "border-box",
   display: "flex",
   justifyContent: "flex-end",
-  padding: "0 10px 0 0",
+  width: "100%",
   alignItems: "center",
 };
 
 const containerClassName = css({
-  color: "rgba(255, 255, 255)",
+  width: "100%",
+  display: "flex",
+  justifyContent: "flex-end",
   fontFamily: "JuliaMono",
   fontSize: "9px",
   textAlign: "center",
@@ -82,24 +87,29 @@ const yellow = css({
   backgroundColor: "#e5c890",
 });
 
+const peach = css({
+  backgroundColor: "#ef9f76",
+});
+
 const clickable = css({
   cursor: "pointer",
+});
+
+const growable = css({
+  flexGrow: "1",
 });
 
 const metricStyle = css({
   display: "inline-block",
   border: "none",
-  padding: "5px 5px",
+  padding: "10px 15px",
   borderRadius: "5px",
   color: "#292c3c",
-  fontWeight: "600",
-});
-
-const metricsStyle = css({
-  display: "flex",
-  flexDirection: "row",
-  justifyContent: "center",
-  gap: "10px",
+  fontWeight: "800",
+  lineHeight: "10px",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
 });
 
 const metricsStyleRow = css({
@@ -107,6 +117,10 @@ const metricsStyleRow = css({
   flexDirection: "row",
   justifyContent: "center",
   gap: "5px",
+});
+
+const fit = css({
+  minWidth: "min-content",
 });
 
 export const initialState = {
@@ -119,6 +133,9 @@ export const initialState = {
   spotifyStatus: "...",
   spotifyArtist: "...",
   spotifySong: "...",
+  battLevel: 0,
+  battRemaining: "...",
+  battStatus: "...",
   cpuUsage: 0,
   memoryUsage: 0,
   volume: 0,
@@ -145,6 +162,8 @@ export const updateState = (event, previousState) => {
       spotifyStatus: event.data.spotify_status,
       spotifyArtist: event.data.spotify_artist,
       spotifySong: event.data.spotify_song,
+      battLevel: event.data.batt_level,
+      battStatus: event.data.batt_status,
       wifi: {
         ssid: event.data.ssid,
       },
@@ -167,6 +186,8 @@ export const render = ({
   memoryUsage,
   wifi,
   volume,
+  battLevel,
+  battStatus,
   spotifyStatus,
   spotifySong,
   spotifyArtist,
@@ -182,48 +203,73 @@ export const render = ({
         integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA=="
         crossOrigin="anonymous"
       />
-      <div className={metricsStyle}>
+      <div style={{ width: "42.5vw", padding: "24px" }}>
         <div className={metricsStyleRow}>
-          <div className={`${metricStyle} ${yellow}`}>
-            <i className="fas fa-headphones" /> {spotifyArtist} - {spotifySong}{" "}
-            |{" "}
-            <i
-              className={`${clickable} fas fa-angle-double-left`}
-              onClick={() => run("StatBar.widget/spotify/spotify-prev.sh")}
-            />{" "}
-            {spotifyStatus === "playing" ? (
+          <div
+            className={`${metricStyle} ${peach} ${growable}`}
+            style={{ display: "flex" }}
+          >
+            <i className="fas fa-headphones" style={{ marginRight: "10px" }} />
+            <span
+              style={{
+                flexGrow: "1",
+                minWidth: "0px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                marginRight: "10px",
+              }}
+            >
+              {spotifyArtist} - {spotifySong}
+            </span>
+            |
+            <span style={{ marginLeft: "10px" }}>
               <i
-                className={`${clickable} fas fa-pause`}
-                onClick={() => run("StatBar.widget/spotify/spotify-pause.sh")}
-              />
-            ) : (
+                className={`${clickable} fas fa-angle-double-left`}
+                onClick={() => run("StatBar.widget/spotify/spotify-prev.sh")}
+              />{" "}
+              {spotifyStatus === "playing" ? (
+                <i
+                  className={`${clickable} fas fa-pause`}
+                  onClick={() => run("StatBar.widget/spotify/spotify-pause.sh")}
+                />
+              ) : (
+                <i
+                  className={`${clickable} fas fa-play`}
+                  onClick={() => run("StatBar.widget/spotify/spotify-play.sh")}
+                />
+              )}{" "}
               <i
-                className={`${clickable} fas fa-play`}
-                onClick={() => run("StatBar.widget/spotify/spotify-play.sh")}
+                className={`${clickable} fas fa-angle-double-right`}
+                onClick={() => run("StatBar.widget/spotify/spotify-next.sh")}
               />
-            )}{" "}
-            <i
-              className={`${clickable} fas fa-angle-double-right`}
-              onClick={() => run("StatBar.widget/spotify/spotify-next.sh")}
-            />
+            </span>
           </div>
-          <div className={`${metricStyle} ${green}`}>
+          <div className={`${metricStyle} ${yellow} ${growable} ${fit}`}>
             <i className={`fas fa-microchip`}></i> {cpuUsage}%
           </div>
-          <div className={`${metricStyle} ${teal}`}>
+          <div className={`${metricStyle} ${green} ${growable} ${fit}`}>
             <i className={`fas fa-memory`}></i> {memoryUsage}%
           </div>
-          <div className={`${metricStyle} ${sky}`}>
+          <div className={`${metricStyle} ${teal} ${growable} ${fit}`}>
             <i className={`fas fa-volume-up`}></i> {volume}%
           </div>
-          <div className={`${metricStyle} ${sapphire}`}>
+          <div className={`${metricStyle} ${sky} ${growable} ${fit}`}>
             <i className="fas fa-wifi"></i>
             {wifi.ssid === "" ? " N/A" : <> {wifi.ssid}</>}
           </div>
-          <div className={`${metricStyle} ${blue}`}>
+          <div className={`${metricStyle} ${sapphire} ${growable} ${fit}`}>
+            {battStatus === "charging" ? (
+              <i className="fas fa-plug" />
+            ) : (
+              <i className="fas fa-battery-half" />
+            )}{" "}
+            {battLevel}%
+          </div>
+          <div className={`${metricStyle} ${blue} ${growable} ${fit}`}>
             <i className={`far fa-calendar`}></i> {day} {dayNum} {month}
           </div>
-          <div className={`${metricStyle} ${lavender}`}>
+          <div className={`${metricStyle} ${lavender} ${growable} ${fit}`}>
             <i className={`far fa-clock`}></i> {time}
           </div>
         </div>

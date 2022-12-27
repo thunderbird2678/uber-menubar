@@ -22,6 +22,23 @@ VOLUME=$(osascript -e 'get volume settings' | grep -o "output volume:\d*" | grep
 SPOTIFY_STATUS=$(osascript -e 'tell application "Spotify" to player state')
 SPOTIFY_ARTIST=$(osascript -e 'tell application "Spotify" to artist of current track')
 SPOTIFY_SONG=$(osascript -e 'tell application "Spotify" to name of current track')
+# get battery information
+BATTERY_LEVEL=$(pmset -g batt | grep -o "\d*%" | grep -o "\d*")
+BATTERY_STATUS=$(pmset -g batt | grep -o  "; [a-zA-Z]*;" | grep -o "[a-zA-Z]*")
 
-# using the above variables, print the output in json format using printf
-printf '{"date_day":"%s","date_month":"%s","date_day_num":"%s","date_year":"%s","date_time":"%s","ssid":"%s","cpu_usage":"%s","mem_usage":"%s","volume":"%s","spotify_status":"%s","spotify_artist":"%s","spotify_song":"%s"}' "$DATE_DAY" "$DATE_MONTH" "$DATE_DAY_NUM" "$DATE_YEAR" "$DATE_TIME" "$SSID" "$CPU_USAGE" "$MEM_USAGE" "$VOLUME" "$SPOTIFY_STATUS" "$SPOTIFY_ARTIST" "$SPOTIFY_SONG"
+printf -v output '{"date_day":"%s",'            "$DATE_DAY"
+printf -v output '"%s\n"date_month":"%s",'      "$output"   "$DATE_MONTH"
+printf -v output '"%s\n"date_day_num":"%s",'    "$output"   "$DATE_DAY_NUM"
+printf -v output '"%s\n"date_year":"%s",'       "$output"   "$DATE_YEAR"
+printf -v output '"%s\n"date_time":"%s",'       "$output"   "$DATE_TIME"
+printf -v output '"%s\n"ssid":"%s",'            "$output"   "$SSID"
+printf -v output '"%s\n"cpu_usage":"%s",'       "$output"   "$CPU_USAGE"
+printf -v output '"%s\n"mem_usage":"%s",'       "$output"   "$MEM_USAGE"
+printf -v output '"%s\n"volume":"%s",'          "$output"   "$VOLUME"
+printf -v output '"%s\n"batt_level":"%s",'      "$output"   "$BATTERY_LEVEL"
+printf -v output '"%s\n"batt_status":"%s",'     "$output"   "$BATTERY_STATUS"
+printf -v output '"%s\n"spotify_status":"%s",'  "$output"   "$SPOTIFY_STATUS"
+printf -v output '"%s\n"spotify_artist":"%s",'  "$output"   "$SPOTIFY_ARTIST"
+printf -v output '"%s\n"spotify_song":"%s"},'   "$output"   "$SPOTIFY_SONG"
+
+printf "%s" "$output"
