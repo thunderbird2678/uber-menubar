@@ -185,18 +185,27 @@ export const render = ({
       <div className={metricsStyle}>
         <div className={metricsStyleRow}>
           <div className={`${metricStyle} ${yellow}`}>
-            {spotifyArtist} - {spotifySong} |{" "}
+            <i className="fas fa-headphones" /> {spotifyArtist} - {spotifySong}{" "}
+            |{" "}
+            <i
+              className={`${clickable} fas fa-angle-double-left`}
+              onClick={() => run("StatBar.widget/spotify/spotify-prev.sh")}
+            />{" "}
             {spotifyStatus === "playing" ? (
               <i
-                className={`${clickable} fas fa-play`}
-                onClick={() => run("StatBar.widget/spotify-pause.sh")}
+                className={`${clickable} fas fa-pause`}
+                onClick={() => run("StatBar.widget/spotify/spotify-pause.sh")}
               />
             ) : (
               <i
-                className={`${clickable} fas fa-pause`}
-                onClick={() => run("StatBar.widget/spotify-play.sh")}
+                className={`${clickable} fas fa-play`}
+                onClick={() => run("StatBar.widget/spotify/spotify-play.sh")}
               />
-            )}
+            )}{" "}
+            <i
+              className={`${clickable} fas fa-angle-double-right`}
+              onClick={() => run("StatBar.widget/spotify/spotify-next.sh")}
+            />
           </div>
           <div className={`${metricStyle} ${green}`}>
             <i className={`fas fa-microchip`}></i> {cpuUsage}%
