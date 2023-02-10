@@ -20,8 +20,8 @@ MEM_USAGE=$(echo "scale=2; $_MEM_USED * $_PAGE_SIZE / $_MAX_MEMORY * 100" | bc)
 VOLUME=$(osascript -e 'get volume settings' | grep -o "output volume:\d*" | grep -o "\d*")
 # spotify stuff
 SPOTIFY_STATUS=$(osascript -e 'tell application "Spotify" to player state')
-SPOTIFY_ARTIST=$(osascript -e 'tell application "Spotify" to artist of current track')
-SPOTIFY_SONG=$(osascript -e 'tell application "Spotify" to name of current track')
+SPOTIFY_ARTIST=$(osascript -e 'tell application "Spotify" to artist of current track' | sed "s/\"/'/g")
+SPOTIFY_SONG=$(osascript -e 'tell application "Spotify" to name of current track' | sed "s/\"/'/g")
 # get battery information
 BATTERY_LEVEL=$(pmset -g batt | grep -o "\d*%" | grep -o "\d*")
 BATTERY_STATUS=$(pmset -g batt | grep -o  "; [a-zA-Z]*;" | grep -o "[a-zA-Z]*")
